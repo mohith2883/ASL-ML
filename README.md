@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/686eae57-ba4e-490d-a1a4-18979cc9dd31)# ASL-ML
+# ASL-ML
 
 The project focused on using the Random Forest algorithm with Mediapipe to recognize sign language in real-time by interpreting hand gesture landmarks.
 It aimed to bridge the communication gap between deaf and hearing communities, promote inclusive and accessible interaction, and demonstrate how AI can help break down language barriers.
