@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Language Recognition</title>
+    <style>
+        /* Body Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Video Container */
+        .video-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Prediction Container */
+        .prediction-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Webcam Frame */
+        #videoFeed {
+            border: 4px solid #007BFF;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            max-width: 100%;
+            height: auto;
+            display: none;
+        }
+
+        /* Prediction Display */
+        .prediction-display {
+            font-size: 200px;
+            font-weight: bold;
+            color: #4cc9f0;
+            text-shadow: 0 0 20px rgba(76, 201, 240, 0.7);
+            margin: 40px 0;
+            transition: all 0.3s ease;
+        }
+
+        .prediction-label {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+        }
+
+        /* Buttons */
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #4361ee;
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        button:last-child {
+            background-color: #f72585;
+        }
+
+        /* Title */
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+            font-size: 2.5rem;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Left Side - Video Feed -->
+        <div class="video-container">
+            <h1>Sign Language Recognition</h1>
+            <img id="videoFeed" src="" width="640" height="480">
+            <div class="buttons">
+                <button onclick="toggleWebcam(true)">Start Webcam</button>
+                <button onclick="toggleWebcam(false)">Stop Webcam</button>
+            </div>
+        </div>
+
+        <!-- Right Side - Prediction -->
+        <div class="prediction-container">
+            <div class="prediction-label">Detected Letter:</div>
+            <div class="prediction-display" id="predictionDisplay">-</div>
+        </div>
+    </div>
+
+    <script>
+        let predictionInterval;
+        
+        function toggleWebcam(start) {
+            if (start) {
+                document.getElementById('videoFeed').src = "{{ url_for('video_feed') }}";
+                document.getElementById('videoFeed').style.display = "block";
+                startPredictionPolling();
+            } else {
+                document.getElementById('videoFeed').src = "";
+                document.getElementById('videoFeed').style.display = "none";
+                clearInterval(predictionInterval);
+                document.getElementById('predictionDisplay').textContent = "-";
+            }
+        }
+
+        function startPredictionPolling() {
+            // Clear any existing interval
+            if (predictionInterval) {
+                clearInterval(predictionInterval);
+            }
+            
+            // Get initial prediction
+            fetchPrediction();
+            
+            // Set up regular polling (every 200ms)
+            predictionInterval = setInterval(fetchPrediction, 200);
+        }
+
+        function fetchPrediction() {
+            fetch('/get_prediction')
+                .then(response => response.json())
+                .then(data => {
+                    const predictionElement = document.getElementById('predictionDisplay');
+                    predictionElement.textContent = data.prediction;
+                    
+                    // Add animation effect
+                    predictionElement.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        predictionElement.style.transform = 'scale(1)';
+                    }, 200);
+                })
+                .catch(error => console.error('Error fetching prediction:', error));
+        }
+    </script>
+</body>
+</html>
